@@ -4,12 +4,12 @@ const { getStorage } = require('firebase/storage');
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-    apiKey: 'AIzaSyDfNjPerjKYWE_jStD7xOpHBk8WX09beD0',
-    authDomain: 'blockworkcloud.firebaseapp.com',
-    projectId: 'blockworkcloud',
-    storageBucket: 'blockworkcloud.appspot.com',
-    messagingSenderId: '782440803834',
-    appId: '1:782440803834:web:4a9c521bfb0a13b3574843',
+    apiKey: process.env.API_KEY,
+    authDomain: process.env.AUTH_DOMAIN,
+    projectId: process.env.PROJECT_ID,
+    storageBucket: process.env.STORAGE_BUCKET,
+    messagingSenderId: process.env.MESSAGING_SENDER_ID,
+    appId: process.env.APP_ID,
 };
 
 // Initialize Firebase
