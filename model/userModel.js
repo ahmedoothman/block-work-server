@@ -39,7 +39,7 @@ const userSchema = new mongoose.Schema({
     role: {
         type: String,
         enum: ['client', 'freelancer'],
-        default: 'user',
+        default: 'freelancer',
     },
 
     verified: {
@@ -78,15 +78,12 @@ const userSchema = new mongoose.Schema({
     },
     jobTitle: {
         type: String,
-        required: true,
     },
     bio: {
         type: String,
-        required: true,
     },
     skills: {
         type: [String],
-        required: true,
     },
     passwordResetCode: String,
     passwordResetExpires: Date,
