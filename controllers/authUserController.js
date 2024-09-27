@@ -140,6 +140,7 @@ exports.signup = [
                 phone: req.body.phone,
                 nationalId: req.body.nationalId,
                 role: req.body.role,
+                country: req.body.country,
                 frontIdPhotoUrl, // Save the URL here
                 backIdPhotoUrl, // Save the URL here
                 userPhotoUrl, // Save the user photo URL here
