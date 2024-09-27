@@ -9,7 +9,8 @@ const portfolioRouter = require('./routes/portfolioRoutes');
 const jobPostRoutes = require('./routes/jobPostRoutes');
 const proposalRoutes = require('./routes/proposalRoutes');
 const chatRoutes = require('./routes/chatRoutes');
-
+const contractRoutes = require('./routes/contractRoutes');
+const reviewRoutes = require('./routes/reviewRoutes');
 const errorController = require('./controllers/errorController');
 
 //secuirty
@@ -53,6 +54,8 @@ app.use('/api/portfolio', portfolioRouter);
 app.use('/api/jobPosts', jobPostRoutes);
 app.use('/api/proposals', proposalRoutes);
 app.use('/api/chats', chatRoutes);
+app.use('/api/contracts', contractRoutes);
+app.use('/api/reviews', reviewRoutes);
 //unhandeled routes gets response with this , must be put at the end of the file after all routes
 app.all('*', (req, res, next) => {
     // res.status(404).json({

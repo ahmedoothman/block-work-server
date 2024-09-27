@@ -8,4 +8,11 @@ const router = express.Router();
 
 router.post('/signup', authController.signup, walletController.createWallet);
 router.post('/login', authController.login);
+router.post('/forgotPassword', authController.forgotPassword);
+router.patch('/resetPassword/:code', authController.resetPassword);
+router.use(authController.protect);
+router.patch('/updateMe', userController.updateMe);
+router.patch('/updateMyPassword', authController.updatePassword);
+router.get('/me', userController.getMe, userController.getUser);
+
 module.exports = router;
