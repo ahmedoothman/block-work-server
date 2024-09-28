@@ -65,15 +65,14 @@ exports.login = catchAsync(async (req, res, next) => {
 });
 
 exports.signup = [
-    // Middleware to handle file uploads
     upload.fields([
         { name: 'frontIdPhoto', maxCount: 1 },
         { name: 'backIdPhoto', maxCount: 1 },
-        { name: 'userPhoto', maxCount: 1 }, // New field for user's photo
+        { name: 'userPhoto', maxCount: 1 },
     ]),
     catchAsync(async (req, res, next) => {
         try {
-            // Check if required files are provided
+            console.log(req.files);
             if (
                 !req.files.frontIdPhoto ||
                 !req.files.backIdPhoto ||

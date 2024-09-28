@@ -1,7 +1,10 @@
 // Import the functions you need from the Firebase SDK
 const { initializeApp } = require('firebase/app');
 const { getStorage } = require('firebase/storage');
+const dotenv = require('dotenv'); // to use environment variable
+dotenv.config({ path: './config.env' }); // configuration of the environment file
 
+dotenv.config();
 // Your web app's Firebase configuration
 const firebaseConfig = {
     apiKey: process.env.API_KEY,
