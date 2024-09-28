@@ -5,7 +5,7 @@ exports.submitProposal = async (req, res) => {
     try {
         const { jobId } = req.params;
         const freelancerId = req.user._id;
-        const { coverLetter, proposedAmount } = req.body;
+        const { coverLetter, proposedAmount, duration } = req.body;
 
         const jobPost = await JobPost.findById(jobId);
 
@@ -18,6 +18,7 @@ exports.submitProposal = async (req, res) => {
             freelancer: freelancerId,
             coverLetter,
             proposedAmount,
+            duration,
         });
 
         await proposal.save();

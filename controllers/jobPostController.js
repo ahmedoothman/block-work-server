@@ -1,11 +1,18 @@
 const JobPost = require('../model/jobPostModel');
+const Proposal = require('../model/proposalModel');
 // const Proposal = require('../models/Proposal');
 
 // Create a new job post
 exports.createJobPost = async (req, res) => {
     try {
-        const { title, description, budget, skillsRequired, category } =
-            req.body;
+        const {
+            title,
+            description,
+            budget,
+            skillsRequired,
+            category,
+            duration,
+        } = req.body;
         const clientId = req.user._id; // Assuming the authenticated client's ID is available
 
         const jobPost = new JobPost({
@@ -15,6 +22,7 @@ exports.createJobPost = async (req, res) => {
             budget,
             skillsRequired,
             category,
+            duration,
         });
 
         await jobPost.save();
@@ -30,13 +38,27 @@ exports.createJobPost = async (req, res) => {
 // Get all job posts
 exports.getJobPosts = async (req, res) => {
     try {
+        // Find all job posts and populate client data
         const jobPosts = await JobPost.find().populate('client', 'name email');
-        res.status(200).json({ results: jobPosts.length, data: jobPosts });
+
+        // Add proposal count for each job post
+        const jobPostsWithProposalCount = await Promise.all(
+            jobPosts.map(async (jobPost) => {
+                const proposalCount = await Proposal.countDocuments({
+                    jobPost: jobPost._id,
+                });
+                return { ...jobPost.toObject(), proposalCount }; // Merge proposalCount with the job post data
+            })
+        );
+
+        res.status(200).json({
+            results: jobPostsWithProposalCount.length,
+            data: jobPostsWithProposalCount,
+        });
     } catch (error) {
         res.status(500).json({ message: 'Error fetching job posts', error });
     }
 };
-
 // Get a single job post
 exports.getJobPost = async (req, res) => {
     try {

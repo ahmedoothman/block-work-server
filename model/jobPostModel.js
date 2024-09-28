@@ -18,6 +18,10 @@ const jobPostSchema = new mongoose.Schema({
         type: Number,
         required: true,
     },
+    duration: {
+        type: Number,
+        required: true,
+    },
     skillsRequired: {
         type: [String],
         required: true,
