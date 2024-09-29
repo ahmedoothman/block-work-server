@@ -54,7 +54,7 @@ exports.getFreelancerProposals = async (req, res) => {
 
         const proposals = await Proposal.find({
             freelancer: freelancerId,
-        }).populate('jobPost', 'title');
+        }).populate('jobPost');
 
         res.status(200).json({ results: proposals.length, data: proposals });
     } catch (error) {

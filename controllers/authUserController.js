@@ -72,7 +72,6 @@ exports.signup = [
     ]),
     catchAsync(async (req, res, next) => {
         try {
-            console.log(req.files);
             if (
                 !req.files.frontIdPhoto ||
                 !req.files.backIdPhoto ||
