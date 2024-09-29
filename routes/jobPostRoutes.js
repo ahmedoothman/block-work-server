@@ -14,6 +14,9 @@ router.get('/', jobPostController.getJobPosts);
 // Get a single job post by ID
 router.get('/:jobId', jobPostController.getJobPost);
 
+// Delete a single job post by ID
+router.delete('/:jobId', jobPostController.deleteJobPost);
+
 // Update a job post
 router.patch('/:jobId', jobPostController.updateJobPost);
 

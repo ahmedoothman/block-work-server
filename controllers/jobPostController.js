@@ -122,3 +122,20 @@ exports.getClientJobPosts = async (req, res) => {
         res.status(500).json({ message: 'Error fetching job posts', error });
     }
 };
+
+//delete a job post
+exports.deleteJobPost = async (req, res) => {
+    try {
+        const { jobId } = req.params;
+
+        const jobPost = await JobPost.findByIdAndDelete(jobId);
+
+        if (!jobPost) {
+            return res.status(404).json({ message: 'Job post not found' });
+        }
+
+        res.status(204).json({ message: 'Job post deleted successfully' });
+    } catch (error) {
+        res.status(500).json({ message: 'Error deleting job post', error });
+    }
+};
