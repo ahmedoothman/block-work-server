@@ -9,7 +9,7 @@ router.use(authController.protect); //all the comming is protected
 // Route to create a new portfolio item
 router.post('/', portfolioController.createPortfolioItem);
 
-router.get('/', portfolioController.getAllPortfolioItems);
+router.get('/:id/explore', portfolioController.getAllPortfolioItems);
 
 router.get('/:id', portfolioController.getPortfolioItem);
 

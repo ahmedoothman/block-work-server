@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const { Types } = mongoose; // Importing Types for ObjectId casting
 const dotenv = require('dotenv'); // to use environment variable
 dotenv.config({ path: './config.env' }); // configuration of the environment file
 const app = require('./app'); // import the express app
@@ -12,7 +13,7 @@ process.on('uncaughtException', (err) => {
     process.exit(1);
 });
 
-// connect with the databas but replacing the password in the link with the password we set from the atals
+// connect with the database, replacing the password in the link with the password we set from Atlas
 const DB = process.env.DATABASE.replace(
     '<PASSWORD>',
     process.env.DATABASE_PASSWORD
@@ -25,7 +26,6 @@ mongoose
         useUnifiedTopology: true,
     })
     .then((con) => {
-        //  console.log(con);
         console.log('DB Connected Successfully .....');
     });
 
@@ -44,27 +44,31 @@ io.on('connection', (socket) => {
     console.log('New client connected:', socket.id);
 
     socket.on('join', async ({ userId }) => {
-        await User.findByIdAndUpdate(userId, { socketId: socket.id });
+        const userObjectId = Types.ObjectId(userId); // Casting userId to ObjectId
+        await User.findByIdAndUpdate(userObjectId, { socketId: socket.id });
         console.log(`User ${userId} joined with socket ID ${socket.id}`);
     });
 
     // Handle chat messages
     socket.on('sendMessage', async ({ senderId, receiverId, message }) => {
         try {
+            const senderObjectId = Types.ObjectId(senderId); // Casting senderId to ObjectId
+            const receiverObjectId = Types.ObjectId(receiverId); // Casting receiverId to ObjectId
+
             // Save the message in the database
+            console.log('Message:', receiverObjectId, message);
             const newMessage = new Chat({
-                from: senderId,
-                to: receiverId,
+                from: senderObjectId,
+                to: receiverObjectId,
                 message: message,
             });
             await newMessage.save();
 
             // Fetch receiver's socket ID from the database
-            const receiver = await User.findById(receiverId);
+            const receiver = await User.findById(receiverObjectId);
 
             if (receiver && receiver.socketId) {
                 // Emit the message to the receiver
-
                 io.to(receiver.socketId).emit('receiveMessage', {
                     senderId,
                     message,
@@ -86,9 +90,10 @@ io.on('connection', (socket) => {
         );
     });
 });
-process.on('unhandeledRejection', (err) => {
+
+process.on('unhandledRejection', (err) => {
     console.log(err);
-    console.log('Shuting down');
+    console.log('Shutting down');
     server.close(() => {
         process.exit(1);
     });
@@ -96,7 +101,7 @@ process.on('unhandeledRejection', (err) => {
 
 process.on('uncaughtException', (err) => {
     console.log(err);
-    console.log('Shuting down');
+    console.log('Shutting down');
     server.close(() => {
         process.exit(1);
     });

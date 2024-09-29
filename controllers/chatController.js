@@ -56,7 +56,9 @@ exports.getAllChats = async (req, res) => {
             },
         ]);
 
-        res.status(200).json(chats);
+        res.status(200).json({
+            data: chats,
+        });
     } catch (error) {
         console.error('Error getting all chats:', error);
         res.status(500).json({ error: 'Error retrieving chats' });
@@ -80,7 +82,9 @@ exports.getChatHistory = async (req, res) => {
             .populate('from', 'id name') // Populate 'from' field with 'id' and 'name'
             .populate('to', 'id name'); // Populate 'to' field with 'id' and 'name'; // Sort by ascending order of timestamp
 
-        res.status(200).json(chatHistory);
+        res.status(200).json({
+            data: chatHistory,
+        });
     } catch (error) {
         console.error('Error getting chat history:', error);
         res.status(500).json({ error: 'Error retrieving chat history' });

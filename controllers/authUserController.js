@@ -71,6 +71,7 @@ exports.signup = [
         { name: 'userPhoto', maxCount: 1 },
     ]),
     catchAsync(async (req, res, next) => {
+        console.log(req.body);
         try {
             if (
                 !req.files.frontIdPhoto ||
