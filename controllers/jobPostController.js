@@ -39,7 +39,10 @@ exports.createJobPost = async (req, res) => {
 exports.getJobPosts = async (req, res) => {
     try {
         // Find all job posts and populate client data
-        const jobPosts = await JobPost.find().populate('client', 'name email');
+        const jobPosts = await JobPost.find().populate(
+            'client',
+            'name email country'
+        );
 
         // Add proposal count for each job post
         const jobPostsWithProposalCount = await Promise.all(
