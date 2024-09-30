@@ -1,11 +1,81 @@
+const User = require('../model/userModel');
+
 const catchAsync = require('../utils/catchAsync');
+const { ethers } = require('ethers');
+const reviewContractABI = require('../ABI/reviewContractABI.json');
+const { format } = require('morgan');
+const providerUrl = process.env.ETHEREUM_PROVIDER_URL;
 
 exports.createReview = catchAsync(async (req, res, next) => {
-    // we want client id and freelancer id and the details of the review
+    const reviewer = req.user._id;
+    const { reviewee, comment, rating } = req.body;
+
+    const provider = new ethers.JsonRpcProvider(providerUrl);
+    const privateKey = process.env.WALLET_PRIVATE_KEY;
+
+    const wallet = new ethers.Wallet(privateKey, provider);
+
+    const contractAddress = process.env.REVIEW_CONTRACT_ADDRESS;
+
+    const contract = new ethers.Contract(
+        contractAddress,
+        reviewContractABI,
+        wallet
+    );
+
+    const tx = await contract.createReview(
+        reviewer.toString(),
+        reviewee.toString(),
+        comment,
+        rating.toString()
+    );
+
+    const receipt = await tx.wait();
+
+    // get the client and freelancer
+    const client = await User.findById(reviewer);
+    const freelancer = await User.findById(reviewee);
+    res.status(201).json({
+        status: 'success',
+        data: {
+            client: client,
+            freelancer: freelancer,
+            comment: comment,
+            rating: rating.toString(),
+            transactionHash: receipt.transactionHash,
+        },
+    });
 });
 
 exports.getAllReviews = catchAsync(async (req, res, next) => {
-    // get all reviews of the freelancer or client
+    const reviewee = req.params.revieweeId;
+
+    const provider = new ethers.JsonRpcProvider(providerUrl);
+    const contractAddress = process.env.REVIEW_CONTRACT_ADDRESS;
+    const contract = new ethers.Contract(
+        contractAddress,
+        reviewContractABI,
+        provider
+    );
+
+    const reviews = await contract.getReviewsByReviewee(reviewee);
+    const formatedReviews = await Promise.all(
+        reviews.map(async (review) => {
+            const reviewer = await User.findById(review[0]);
+            const reviewee = await User.findById(review[1]);
+
+            return {
+                reviewer,
+                reviewee,
+                comment: review[2],
+                rating: review[3].toString(),
+            };
+        })
+    );
+    res.status(200).json({
+        status: 'success',
+        data: formatedReviews,
+    });
 });
 
 exports.getReview = catchAsync(async (req, res, next) => {

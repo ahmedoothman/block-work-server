@@ -4,7 +4,6 @@ const jobPost = require('../model/jobPostModel');
 const catchAsync = require('../utils/catchAsync');
 const { ethers } = require('ethers');
 const freelancerContractABI = require('../ABI/freelancerContractABI.json');
-const walletAddress = process.env.WALLET_ADDRESS;
 const providerUrl = process.env.ETHEREUM_PROVIDER_URL;
 
 exports.createContract = catchAsync(async (req, res, next) => {
