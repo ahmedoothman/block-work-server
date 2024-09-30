@@ -31,7 +31,7 @@ const app = express(); // creating express app
 //     windowMs: 60 * 60 * 1000,
 //     message: 'Too many requests drom this IP, please try again in an hour!',
 // });
-app.use('/api', limiter);
+// app.use('/api', limiter);
 
 app.use(express.json({ limit: '10kb' })); // we need that middleware for convert the url we got to json (not sure)
 app.use(express.urlencoded({ extended: true }));
