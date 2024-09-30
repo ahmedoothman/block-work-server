@@ -5,15 +5,14 @@ const authController = require('../controllers/authUserController');
 
 router.use(authController.protect);
 
-router.post('/', contractController.setUserInfo);
-router.get('/', contractController.getUserInfo);
-router.get('/:contractId', contractController.getContract);
+router.post('/', contractController.createContract);
+router.get('/', contractController.getAllContracts);
 router.get('/client/my-contracts', contractController.getClientContracts);
 router.get(
     '/freelancer/my-contracts',
     contractController.getFreelancerContracts
 );
 
-router.patch('/:contractId/status', contractController.updateContractStatus);
+router.patch('/:jobID/status', contractController.updateContractStatus);
 
 module.exports = router;
