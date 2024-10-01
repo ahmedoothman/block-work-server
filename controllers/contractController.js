@@ -27,8 +27,8 @@ exports.createContract = catchAsync(async (req, res, next) => {
         clientId.toString(),
         freelancerId.toString(),
         jobID.toString(),
-        ethers.parseUnits(amount.toString(), 18),
-        ethers.parseUnits(duration.toString(), 18)
+        +amount,
+        +duration
     );
 
     const receipt = await tx.wait();
@@ -66,12 +66,12 @@ exports.getAllContracts = catchAsync(async (req, res, next) => {
             const client = await User.findById(contract[0]);
             const freelancer = await User.findById(contract[1]);
             const job = await jobPost.findById(contract[2]);
-
+            console.log(contract[6]);
             return {
-                amount: ethers.formatEther(contract[3]),
+                amount: contract[3].toString(),
                 createdDate: new Date(+contract[4].toString() * 1000),
-                duration: ethers.formatEther(contract[5]),
-                status: ethers.formatEther(contract[6]),
+                duration: contract[5].toString(),
+                status: contract[6].toString(),
                 client,
                 freelancer,
                 job,
@@ -106,10 +106,10 @@ exports.getFreelancerContracts = catchAsync(async (req, res, next) => {
             const job = await jobPost.findById(contract[2]);
 
             return {
-                amount: ethers.formatEther(contract[3]),
+                amount: contract[3].toString(),
                 createdDate: new Date(+contract[4].toString() * 1000),
-                duration: ethers.formatEther(contract[5]),
-                status: ethers.formatEther(contract[6]),
+                duration: contract[5].toString(),
+                status: contract[6].toString(),
                 client,
                 freelancer,
                 job,
@@ -144,9 +144,9 @@ exports.getClientContracts = catchAsync(async (req, res, next) => {
             const job = await jobPost.findById(contract[2]);
 
             return {
-                amount: ethers.formatEther(contract[3]),
+                amount: contract[3].toString(),
                 createdDate: new Date(+contract[4].toString() * 1000),
-                duration: ethers.formatEther(contract[5]),
+                duration: contract[5].toString(),
                 status: contract[6].toString(),
                 client,
                 freelancer,
@@ -175,14 +175,15 @@ exports.updateContractStatus = catchAsync(async (req, res, next) => {
 
     const jobID = req.params.jobID;
     const status = req.body.status; //pending 0 , completed 1, cancelled 2
-    console.log(jobID, status);
     const contractIndex = await contract.getContractIndexByJobID(
         jobID.toString()
     );
 
-    console.log(contractIndex.toString());
-
-    const tx = await contract.updateContractStatus(contractIndex, status);
+    console.log(contractIndex, status);
+    const tx = await contract.updateContractStatus(
+        contractIndex,
+        status.toString()
+    );
 
     await tx.wait();
 
