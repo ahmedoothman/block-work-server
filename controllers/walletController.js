@@ -14,7 +14,9 @@ exports.getWallet = async (req, res) => {
             return res.status(404).json({ message: 'Wallet not found' });
         }
 
-        res.status(200).json(wallet);
+        res.status(200).json({
+            data: wallet,
+        });
     } catch (error) {
         res.status(400).json({ error: error.message });
     }
@@ -69,7 +71,9 @@ exports.updateWalletBalance = async (req, res) => {
         wallet.updatedAt = Date.now();
         await wallet.save();
 
-        res.status(200).json(wallet);
+        res.status(200).json({
+            data: wallet,
+        });
     } catch (error) {
         res.status(400).json({ error: error.message });
     }
