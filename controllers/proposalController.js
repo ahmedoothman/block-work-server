@@ -37,8 +37,7 @@ exports.getProposalsForJob = async (req, res) => {
     try {
         const { jobId } = req.params;
         const proposals = await Proposal.find({ jobPost: jobId }).populate(
-            'freelancer',
-            'name email'
+            'freelancer'
         );
 
         res.status(200).json({ results: proposals.length, data: proposals });
