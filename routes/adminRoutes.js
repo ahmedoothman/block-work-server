@@ -14,9 +14,6 @@ router.use(authController.protect); //all the comming is protected
 router.use(authController.restrictTo('admin'));
 router.route('/users').get(userController.getAllUsers);
 router.get('/contracts', contractController.getAllContracts);
-router
-    .route('/users/:id')
-    .get(userController.getUser)
-    .patch(userController.verifyUser);
+router.route('/users/:id').patch(userController.verifyUser);
 
 module.exports = router;
