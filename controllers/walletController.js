@@ -78,3 +78,24 @@ exports.updateWalletBalance = async (req, res) => {
         res.status(400).json({ error: error.message });
     }
 };
+
+exports.updateWalletBalanceUtility = async (data) => {
+    // data has : clientId,freelancerId, amount // get the wallet of the client and freelancer
+    // make the transaction from the client to the freelancer wallet
+    const clientWallet = await Wallet.findOne({ user: data.clientId });
+    const freelancerWallet = await Wallet.findOne({ user: data.freelancerId });
+    if (!clientWallet || !freelancerWallet) {
+        return false;
+    }
+
+    // update the balances
+    clientWallet.availableBalance -= +data.amount;
+
+    // update the pending avail of the freelancer
+    freelancerWallet.availableBalance += +data.amount;
+
+    await clientWallet.save();
+    await freelancerWallet.save();
+
+    return true;
+};

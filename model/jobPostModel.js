@@ -30,9 +30,10 @@ const jobPostSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-    isActive: {
-        type: Boolean,
-        default: true,
+    status: {
+        type: String,
+        enum: ['open', 'in-progress', 'completed'],
+        default: 'open',
     },
     createdAt: {
         type: Date,

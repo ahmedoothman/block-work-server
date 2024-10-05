@@ -5,15 +5,15 @@ const router = express.Router();
 
 router.use(authController.protect);
 
-// Create a new job post
-router.post('/', jobPostController.createJobPost);
-
 // Get all job posts
 router.get('/', jobPostController.getJobPosts);
 
 // Get a single job post by ID
 router.get('/:jobId', jobPostController.getJobPost);
 
+router.use(authController.restrictTo('client'));
+// Create a new job post
+router.post('/', jobPostController.createJobPost);
 // Delete a single job post by ID
 router.delete('/:jobId', jobPostController.deleteJobPost);
 

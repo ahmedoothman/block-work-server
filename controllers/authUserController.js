@@ -71,7 +71,6 @@ exports.signup = [
         { name: 'userPhoto', maxCount: 1 },
     ]),
     catchAsync(async (req, res, next) => {
-        console.log(req.body);
         try {
             if (
                 !req.files.frontIdPhoto ||
@@ -286,7 +285,7 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
     if (!user) {
         return next(new AppError('code is expired or invalid', 400));
     }
-    //console.log(req.body.password);
+
     //3) update password
     user.password = req.body.password;
     user.passwordConfirm = req.body.passwordConfirm;

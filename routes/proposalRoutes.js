@@ -4,23 +4,25 @@ const authController = require('../controllers/authUserController');
 const router = express.Router();
 
 router.use(authController.protect);
-// Submit a proposal
-router.post('/:jobId/proposals', proposalController.submitProposal);
 
-// Get all proposals for a job post
-router.get('/:jobId/proposals', proposalController.getProposalsForJob);
+router.get(
+    '/:jobId/proposals',
+    authController.restrictTo('client'),
+    proposalController.getProposalsForJob
+);
+router.patch(
+    '/:proposalId/status',
+    authController.restrictTo('client'),
+    proposalController.updateProposalStatus
+);
 
-// Get all proposals by a freelancer
+router.use(authController.restrictTo('freelancer'));
 router.get(
     '/freelancer/my-proposals',
     proposalController.getFreelancerProposals
 );
-
-// Update a proposal
 router.patch('/:proposalId', proposalController.updateProposal);
-
-// Delete a proposal
 router.delete('/:proposalId', proposalController.deleteProposal);
+router.post('/:jobId/proposals', proposalController.submitProposal);
 
-router.patch('/:proposalId/status', proposalController.updateProposalStatus);
 module.exports = router;

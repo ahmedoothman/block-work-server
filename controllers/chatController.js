@@ -70,7 +70,7 @@ exports.getChatHistory = async (req, res) => {
     try {
         const userId = req.user._id; // The currently logged-in user
         const otherUserId = req.params.userId;
-        console.log(otherUserId);
+
         // Find all messages between these two users
         const chatHistory = await Chat.find({
             $or: [

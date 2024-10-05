@@ -1,8 +1,6 @@
 const JobPost = require('../model/jobPostModel');
 const Proposal = require('../model/proposalModel');
-// const Proposal = require('../models/Proposal');
 
-// Create a new job post
 exports.createJobPost = async (req, res) => {
     try {
         const {
@@ -13,7 +11,7 @@ exports.createJobPost = async (req, res) => {
             category,
             duration,
         } = req.body;
-        const clientId = req.user._id; // Assuming the authenticated client's ID is available
+        const clientId = req.user._id;
 
         const jobPost = new JobPost({
             client: clientId,
@@ -35,22 +33,20 @@ exports.createJobPost = async (req, res) => {
     }
 };
 
-// Get all job posts
 exports.getJobPosts = async (req, res) => {
     try {
-        // Find all job posts and populate client data
-        const jobPosts = await JobPost.find().populate(
+        // Find job posts with status 'open'
+        const jobPosts = await JobPost.find({ status: 'open' }).populate(
             'client',
             'name email country'
         );
 
-        // Add proposal count for each job post
         const jobPostsWithProposalCount = await Promise.all(
             jobPosts.map(async (jobPost) => {
                 const proposalCount = await Proposal.countDocuments({
                     jobPost: jobPost._id,
                 });
-                return { ...jobPost.toObject(), proposalCount }; // Merge proposalCount with the job post data
+                return { ...jobPost.toObject(), proposalCount };
             })
         );
 
@@ -62,7 +58,7 @@ exports.getJobPosts = async (req, res) => {
         res.status(500).json({ message: 'Error fetching job posts', error });
     }
 };
-// Get a single job post
+
 exports.getJobPost = async (req, res) => {
     try {
         const { jobId } = req.params;
@@ -80,7 +76,6 @@ exports.getJobPost = async (req, res) => {
     }
 };
 
-// Update a job post
 exports.updateJobPost = async (req, res) => {
     try {
         const { jobId } = req.params;
@@ -111,7 +106,6 @@ exports.updateJobPost = async (req, res) => {
     }
 };
 
-// get all job posts by a client
 exports.getClientJobPosts = async (req, res) => {
     try {
         const clientId = req.user._id;
@@ -123,7 +117,6 @@ exports.getClientJobPosts = async (req, res) => {
     }
 };
 
-//delete a job post
 exports.deleteJobPost = async (req, res) => {
     try {
         const { jobId } = req.params;

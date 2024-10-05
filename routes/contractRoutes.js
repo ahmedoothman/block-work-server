@@ -6,7 +6,7 @@ const authController = require('../controllers/authUserController');
 router.use(authController.protect);
 
 router.post('/', contractController.createContract);
-
+router.get('/', contractController.getAllContracts);
 router.get('/client/my-contracts', contractController.getClientContracts);
 router.get(
     '/freelancer/my-contracts',

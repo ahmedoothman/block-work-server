@@ -158,7 +158,6 @@ exports.deletePortfolioItem = async (req, res) => {
 exports.getAllPortfolioItems = async (req, res) => {
     try {
         const id = req.params.id;
-        console.log(id);
         const portfolioItems = await PortfolioItem.find({ user: id });
         res.status(200).json({
             results: portfolioItems.length,

@@ -1,6 +1,6 @@
 const JobPost = require('../model/jobPostModel');
 const Proposal = require('../model/proposalModel');
-
+const contractController = require('../controllers/contractController');
 exports.submitProposal = async (req, res) => {
     try {
         const { jobId } = req.params;
@@ -8,6 +8,20 @@ exports.submitProposal = async (req, res) => {
         const { coverLetter, proposedAmount, duration } = req.body;
 
         const jobPost = await JobPost.findById(jobId);
+
+        // check if the freelancer has already submitted a proposal for this job
+        const existingProposal = await Proposal.findOne({
+            jobPost: jobId,
+            freelancer: freelancerId,
+        });
+        if (existingProposal) {
+            return res
+                .status(400)
+                .json({
+                    message:
+                        'You have already submitted a proposal for this job',
+                });
+        }
 
         if (!jobPost) {
             return res.status(404).json({ message: 'Job post not found' });
@@ -110,7 +124,6 @@ exports.updateProposalStatus = async (req, res) => {
         if (!validStatuses.includes(status)) {
             return res.status(400).json({ message: 'Invalid status value' });
         }
-
         const proposal = await Proposal.findByIdAndUpdate(
             proposalId,
             { status },
@@ -119,6 +132,36 @@ exports.updateProposalStatus = async (req, res) => {
 
         if (!proposal) {
             return res.status(404).json({ message: 'Proposal not found' });
+        }
+
+        // create a contract if status is accepted
+        if (status === 'accepted') {
+            const response = await contractController.createContractUtility({
+                clientId: req.user._id,
+                freelancerId: proposal.freelancer,
+                jobID: proposal.jobPost,
+                amount: proposal.proposedAmount,
+                duration: proposal.duration,
+            });
+            if (response.status !== 'success') {
+                return res.status(500).json({
+                    message: 'Error creating contract',
+                });
+            }
+        }
+
+        // update job post status to 'in progress' if proposal is accepted
+        if (status === 'accepted') {
+            await JobPost.findByIdAndUpdate(proposal.jobPost, {
+                status: 'in-progress',
+            });
+        }
+
+        // update job post status to 'open' if proposal is rejected
+        if (status === 'rejected') {
+            await JobPost.findByIdAndUpdate(proposal.jobPost, {
+                status: 'open',
+            });
         }
 
         res.status(200).json({
