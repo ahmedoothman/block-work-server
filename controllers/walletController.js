@@ -103,7 +103,7 @@ exports.updateWalletBalanceUtility = async (data) => {
     clientWallet.availableBalance -= +data.amount;
 
     // update the pending avail of the freelancer
-    freelancerWallet.availableBalance += +amountToTransfer;
+    freelancerWallet.pendingBalance += +amountToTransfer;
 
     await clientWallet.save();
     await freelancerWallet.save();
