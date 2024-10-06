@@ -90,12 +90,16 @@ exports.updateWalletBalanceUtility = async (data) => {
     // suntract 10% from the amount as commission
     const commission = (10 / 100) * +data.amount;
     // save commission to the stats/stats.json file
-    const stats = JSON.parse(fs.readFileSync('stats/stats.json'));
-    stats.totalProfit += commission;
-    fs.writeFileSync('stats/stats.json', JSON.stringify(stats));
+    // const stats = JSON.parse(fs.readFileSync('stats/stats.json'));
+    // stats.totalProfit += commission;
+    // fs.writeFileSync('stats/stats.json', JSON.stringify(stats));
 
     const amountToTransfer = +data.amount - commission;
+    console.log(amountToTransfer);
     // update the balances
+    if (clientWallet.availableBalance < +data.amount) {
+        return false;
+    }
     clientWallet.availableBalance -= +data.amount;
 
     // update the pending avail of the freelancer

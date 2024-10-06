@@ -268,13 +268,27 @@ exports.getClientContracts = catchAsync(async (req, res, next) => {
 
 exports.updateContractStatus = catchAsync(async (req, res, next) => {
     const jobID = req.params.jobID;
-    const status = req.body.status; // pending: 0, completed: 1, cancelled: 2
+    const status = req.body.contractStatus; // pending, completed cancelled
+    console.log(status);
+    let statusValue;
+
+    switch (status) {
+        case 'pending':
+            statusValue = 0;
+            break;
+        case 'completed':
+            statusValue = 1;
+            break;
+        case 'cancelled':
+            statusValue = 2;
+            break;
+    }
 
     // Get proposal by jobID
     const proposalData = await proposal.findOne({ jobPost: jobID });
     // If completed, pay the freelancer and close the contract and job post status to completed
-    if (+status === 1) {
-        await jobPost.findByIdAndUpdate(jobID, {
+    if (+statusValue === 1) {
+        const job = await jobPost.findByIdAndUpdate(jobID, {
             status: 'completed',
         });
 
@@ -290,7 +304,7 @@ exports.updateContractStatus = catchAsync(async (req, res, next) => {
             });
         }
     }
-    if (+status === 2) {
+    if (+statusValue === 2) {
         await jobPost.findByIdAndUpdate(jobID, {
             status: 'open',
         });
@@ -323,7 +337,7 @@ exports.updateContractStatus = catchAsync(async (req, res, next) => {
         res.status(200).json({
             status: 'success',
             data: {
-                status,
+                statusValue,
             },
         });
     } else {
@@ -333,21 +347,7 @@ exports.updateContractStatus = catchAsync(async (req, res, next) => {
             return res.status(404).json({ message: 'Contract not found' });
         }
 
-        switch (+status) {
-            case 0:
-                contract.status = 'pending';
-                break;
-            case 1:
-                contract.status = 'completed';
-                break;
-            case 2:
-                contract.status = 'cancelled';
-                break;
-            default:
-                return res
-                    .status(400)
-                    .json({ message: 'Invalid status value' });
-        }
+        contract.status = status;
 
         await contract.save();
         res.status(200).json({
