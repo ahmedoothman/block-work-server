@@ -99,3 +99,26 @@ exports.updateWalletBalanceUtility = async (data) => {
 
     return true;
 };
+
+exports.chargeWallet = async (req, res) => {
+    try {
+        const { _id: userId } = req.user;
+        const { amount } = req.body;
+
+        const wallet = await Wallet.findOne({ user: userId });
+        if (!wallet) {
+            return res.status(404).json({ message: 'Wallet not found' });
+        }
+
+        wallet.availableBalance += amount;
+
+        wallet.updatedAt = Date.now();
+        await wallet.save();
+
+        res.status(200).json({
+            data: wallet,
+        });
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+};

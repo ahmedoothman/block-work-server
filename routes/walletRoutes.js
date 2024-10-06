@@ -3,6 +3,7 @@ const {
     getWallet,
     createWallet,
     updateWalletBalance,
+    chargeWallet,
 } = require('../controllers/walletController'); // Adjust the path as necessary
 
 const authController = require('../controllers/authUserController');
@@ -16,4 +17,5 @@ router.post('/create', createWallet);
 // Route to update wallet balances
 router.patch('/updateWallet', updateWalletBalance);
 
+router.patch('/chargeWallet', chargeWallet);
 module.exports = router;
