@@ -1,12 +1,12 @@
 const Chat = require('../model/chatModel');
 const User = require('../model/userModel');
 
-// Get all chats involving the current user
+const moment = require('moment');
+
 exports.getAllChats = async (req, res) => {
     try {
-        const userId = req.user._id; // Assuming you're using some form of authentication middleware
+        const userId = req.user._id;
 
-        // Find all chat threads involving this user
         const chats = await Chat.aggregate([
             {
                 $match: {
@@ -56,8 +56,20 @@ exports.getAllChats = async (req, res) => {
             },
         ]);
 
+        const formattedChats = chats.map((chat) => ({
+            ...chat,
+            lastTimestamp: moment(chat.lastTimestamp).format(
+                'YYYY-MM-DD HH:mm:ss'
+            ),
+        }));
+
+        // order formattedChats by lastTimestamp
+        formattedChats.sort((a, b) => {
+            return new Date(b.lastTimestamp) - new Date(a.lastTimestamp);
+        });
+
         res.status(200).json({
-            data: chats,
+            data: formattedChats,
         });
     } catch (error) {
         console.error('Error getting all chats:', error);
@@ -65,13 +77,11 @@ exports.getAllChats = async (req, res) => {
     }
 };
 
-// Get chat history with a specific user
 exports.getChatHistory = async (req, res) => {
     try {
-        const userId = req.user._id; // The currently logged-in user
+        const userId = req.user._id;
         const otherUserId = req.params.userId;
 
-        // Find all messages between these two users
         const chatHistory = await Chat.find({
             $or: [
                 { from: userId, to: otherUserId },
@@ -79,8 +89,8 @@ exports.getChatHistory = async (req, res) => {
             ],
         })
             .sort({ timestamp: 1 })
-            .populate('from', 'id name') // Populate 'from' field with 'id' and 'name'
-            .populate('to', 'id name'); // Populate 'to' field with 'id' and 'name'; // Sort by ascending order of timestamp
+            .populate('from', 'id name')
+            .populate('to', 'id name');
 
         res.status(200).json({
             data: chatHistory,
@@ -91,9 +101,8 @@ exports.getChatHistory = async (req, res) => {
     }
 };
 
-// Mark messages as read
 exports.markMessagesAsRead = async (req, res) => {
-    const userId = req.user._id; // Current user
+    const userId = req.user._id;
     const otherUserId = req.params.userId;
 
     try {

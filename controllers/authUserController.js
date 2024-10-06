@@ -64,91 +64,31 @@ exports.login = catchAsync(async (req, res, next) => {
     createSendToken(user, 200, res);
 });
 
-exports.signup = [
-    upload.fields([
-        { name: 'frontIdPhoto', maxCount: 1 },
-        { name: 'backIdPhoto', maxCount: 1 },
-        { name: 'userPhoto', maxCount: 1 },
-    ]),
-    catchAsync(async (req, res, next) => {
-        try {
-            if (
-                !req.files.frontIdPhoto ||
-                !req.files.backIdPhoto ||
-                !req.files.userPhoto
-            ) {
-                return next(
-                    new AppError(
-                        'Front ID photo, back ID photo, and user photo are required.',
-                        400
-                    )
-                );
-            }
+exports.signup = catchAsync(async (req, res, next) => {
+    try {
+        console.log(req.body);
+        const newUser = await User.create({
+            name: req.body.name,
+            email: req.body.email,
+            password: req.body.password,
+            passwordConfirm: req.body.passwordConfirm,
+            phone: req.body.phone,
+            nationalId: req.body.nationalId,
+            role: req.body.role,
+            country: req.body.country,
+            frontIdPhotoUrl: req.body.frontIdPhotoUrl,
+            backIdPhotoUrl: req.body.backIdPhotoUrl,
+            userPhotoUrl: req.body.userPhotoUrl,
+        });
 
-            const frontPhotoRef = ref(
-                storage,
-                `users/${Date.now()}_frontIdPhoto${path.extname(
-                    req.files.frontIdPhoto[0].originalname
-                )}`
-            );
-            const backPhotoRef = ref(
-                storage,
-                `users/${Date.now()}_backIdPhoto${path.extname(
-                    req.files.backIdPhoto[0].originalname
-                )}`
-            );
-            const userPhotoRef = ref(
-                storage,
-                `users/${Date.now()}_userPhoto${path.extname(
-                    req.files.userPhoto[0].originalname
-                )}`
-            );
-
-            const frontIdPhotoSnapshot = await uploadBytes(
-                frontPhotoRef,
-                req.files.frontIdPhoto[0].buffer
-            );
-            const backIdPhotoSnapshot = await uploadBytes(
-                backPhotoRef,
-                req.files.backIdPhoto[0].buffer
-            );
-            const userPhotoSnapshot = await uploadBytes(
-                userPhotoRef,
-                req.files.userPhoto[0].buffer
-            );
-
-            const frontIdPhotoUrl = await getDownloadURL(
-                frontIdPhotoSnapshot.ref
-            );
-            const backIdPhotoUrl = await getDownloadURL(
-                backIdPhotoSnapshot.ref
-            );
-            const userPhotoUrl = await getDownloadURL(userPhotoSnapshot.ref);
-
-            const newUser = await User.create({
-                walletAddress: req.body.walletAddress,
-                name: req.body.name,
-                email: req.body.email,
-                password: req.body.password,
-                passwordConfirm: req.body.passwordConfirm,
-                phone: req.body.phone,
-                nationalId: req.body.nationalId,
-                role: req.body.role,
-                country: req.body.country,
-                frontIdPhotoUrl,
-                backIdPhotoUrl,
-                userPhotoUrl,
-            });
-
-            req.body.userId = newUser._id;
-            req.user = newUser;
-            next();
-        } catch (err) {
-            console.log(err);
-            return next(new AppError('Error uploading files', 500));
-        }
-    }),
-];
+        req.body.userId = newUser._id;
+        req.user = newUser;
+        next();
+    } catch (err) {
+        console.log(err);
+        return next(new AppError('Failed to sign up', 500));
+    }
+});
 
 exports.protect = catchAsync(async (req, res, next) => {
     let token;

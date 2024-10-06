@@ -15,12 +15,9 @@ exports.submitProposal = async (req, res) => {
             freelancer: freelancerId,
         });
         if (existingProposal) {
-            return res
-                .status(400)
-                .json({
-                    message:
-                        'You have already submitted a proposal for this job',
-                });
+            return res.status(400).json({
+                message: 'You have already submitted a proposal for this job',
+            });
         }
 
         if (!jobPost) {
@@ -50,9 +47,9 @@ exports.submitProposal = async (req, res) => {
 exports.getProposalsForJob = async (req, res) => {
     try {
         const { jobId } = req.params;
-        const proposals = await Proposal.find({ jobPost: jobId }).populate(
-            'freelancer'
-        );
+        const proposals = await Proposal.find({ jobPost: jobId })
+            .populate('freelancer')
+            .populate('jobPost');
 
         res.status(200).json({ results: proposals.length, data: proposals });
     } catch (error) {
@@ -118,17 +115,20 @@ exports.updateProposalStatus = async (req, res) => {
     try {
         const { proposalId } = req.params;
         const { status } = req.body;
-
+        console.log(status);
         // Validate status
         const validStatuses = ['pending', 'accepted', 'rejected'];
         if (!validStatuses.includes(status)) {
             return res.status(400).json({ message: 'Invalid status value' });
         }
+
         const proposal = await Proposal.findByIdAndUpdate(
             proposalId,
             { status },
             { new: true }
-        );
+        )
+            .populate('jobPost')
+            .populate('freelancer');
 
         if (!proposal) {
             return res.status(404).json({ message: 'Proposal not found' });
@@ -143,23 +143,21 @@ exports.updateProposalStatus = async (req, res) => {
                 amount: proposal.proposedAmount,
                 duration: proposal.duration,
             });
+
             if (response.status !== 'success') {
                 return res.status(500).json({
                     message: 'Error creating contract',
                 });
             }
-        }
 
-        // update job post status to 'in progress' if proposal is accepted
-        if (status === 'accepted') {
-            await JobPost.findByIdAndUpdate(proposal.jobPost, {
+            await JobPost.findByIdAndUpdate(proposal.jobPost._id, {
                 status: 'in-progress',
             });
         }
 
         // update job post status to 'open' if proposal is rejected
         if (status === 'rejected') {
-            await JobPost.findByIdAndUpdate(proposal.jobPost, {
+            await JobPost.findByIdAndUpdate(proposal.jobPost._id, {
                 status: 'open',
             });
         }
@@ -169,6 +167,7 @@ exports.updateProposalStatus = async (req, res) => {
             data: proposal,
         });
     } catch (error) {
+        console.log(error);
         res.status(500).json({
             message: 'Error updating proposal status',
             error,

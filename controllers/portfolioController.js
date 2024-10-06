@@ -11,64 +11,31 @@ const multer = require('multer');
 const path = require('path');
 const { v4: uuidv4 } = require('uuid'); // For generating unique filenames
 
-const upload = multer({
-    storage: multer.memoryStorage(),
-    limits: { fileSize: 5 * 1024 * 1024 }, // 5 MB file size limit
-}).array('images', 5); // Limit to 5 files, adjust as needed
+exports.createPortfolioItem = async (req, res) => {
+    try {
+        const { _id: userId } = req.user;
 
-exports.createPortfolioItem = [
-    upload, // Use the updated multer configuration
-    async (req, res) => {
-        try {
-            const { _id: userId } = req.user;
-            const { title, description } = req.body;
-            const files = req.files; // Access the uploaded files
+        // Create a new portfolio item
+        const portfolioItem = new PortfolioItem({
+            ...req.body,
+            user: userId,
+        });
 
-            if (!files || files.length === 0) {
-                return res
-                    .status(400)
-                    .json({ message: 'At least one file is required' });
-            }
+        await portfolioItem.save();
 
-            const fileUrls = [];
+        // Add portfolio item to the user's portfolio
+        await User.findByIdAndUpdate(userId, {
+            $push: { portfolio: portfolioItem._id },
+        });
 
-            // Loop through each uploaded file and upload to Firebase
-            for (const file of files) {
-                const fileRef = ref(
-                    storage,
-                    `portfolio/${uuidv4()}${path.extname(file.originalname)}`
-                );
-
-                await uploadBytes(fileRef, file.buffer);
-                const fileUrl = await getDownloadURL(fileRef);
-                fileUrls.push(fileUrl); // Add the URL to the array
-            }
-
-            // Create a new portfolio item
-            const portfolioItem = new PortfolioItem({
-                title,
-                description,
-                files: fileUrls, // Save the array of file URLs
-                user: userId,
-            });
-
-            await portfolioItem.save();
-
-            // Add portfolio item to the user's portfolio
-            await User.findByIdAndUpdate(userId, {
-                $push: { portfolio: portfolioItem._id },
-            });
-
-            res.status(201).json({
-                message: 'Portfolio item created',
-                data: portfolioItem,
-            });
-        } catch (error) {
-            res.status(400).json({ error: error.message });
-        }
-    },
-];
-
+        res.status(201).json({
+            message: 'Portfolio item created',
+            data: portfolioItem,
+        });
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+};
 exports.getPortfolioItem = async (req, res) => {
     try {
         const { id } = req.params;
@@ -88,55 +55,30 @@ exports.getPortfolioItem = async (req, res) => {
     }
 };
 
-exports.updatePortfolioItem = [
-    upload, // Use the updated multer configuration
-    async (req, res) => {
-        try {
-            const { id } = req.params;
-            const { title, description } = req.body;
+exports.updatePortfolioItem = async (req, res) => {
+    try {
+        const { id } = req.params;
 
-            const updates = { title, description };
-            const fileUrls = [];
+        const updatedPortfolioItem = await PortfolioItem.findByIdAndUpdate(
+            id,
+            req.body,
+            { new: true }
+        );
 
-            // Handle file update if files are provided
-            if (req.files && req.files.length > 0) {
-                for (const file of req.files) {
-                    const fileRef = ref(
-                        storage,
-                        `portfolio/${uuidv4()}${path.extname(
-                            file.originalname
-                        )}`
-                    );
-
-                    await uploadBytes(fileRef, file.buffer);
-                    const fileUrl = await getDownloadURL(fileRef);
-                    fileUrls.push(fileUrl); // Add the new URL to the array
-                }
-                updates.files = fileUrls; // Update the files array
-            }
-
-            const updatedPortfolioItem = await PortfolioItem.findByIdAndUpdate(
-                id,
-                updates,
-                { new: true }
-            );
-
-            if (!updatedPortfolioItem) {
-                return res
-                    .status(404)
-                    .json({ message: 'Portfolio item not found' });
-            }
-
-            res.status(200).json({
-                message: 'Portfolio item updated',
-                data: updatedPortfolioItem,
-            });
-        } catch (error) {
-            res.status(400).json({ error: error.message });
+        if (!updatedPortfolioItem) {
+            return res
+                .status(404)
+                .json({ message: 'Portfolio item not found' });
         }
-    },
-];
 
+        res.status(200).json({
+            message: 'Portfolio item updated',
+            data: updatedPortfolioItem,
+        });
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+};
 exports.deletePortfolioItem = async (req, res) => {
     try {
         const { id } = req.params;

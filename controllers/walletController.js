@@ -1,6 +1,6 @@
 const Wallet = require('../model/walletModel');
 const User = require('../model/userModel');
-
+const fs = require('fs');
 // Get wallet details by user ID
 exports.getWallet = async (req, res) => {
     try {
@@ -87,12 +87,19 @@ exports.updateWalletBalanceUtility = async (data) => {
     if (!clientWallet || !freelancerWallet) {
         return false;
     }
+    // suntract 10% from the amount as commission
+    const commission = (10 / 100) * +data.amount;
+    // save commission to the stats/stats.json file
+    const stats = JSON.parse(fs.readFileSync('stats/stats.json'));
+    stats.totalProfit += commission;
+    fs.writeFileSync('stats/stats.json', JSON.stringify(stats));
 
+    const amountToTransfer = +data.amount - commission;
     // update the balances
     clientWallet.availableBalance -= +data.amount;
 
     // update the pending avail of the freelancer
-    freelancerWallet.availableBalance += +data.amount;
+    freelancerWallet.availableBalance += +amountToTransfer;
 
     await clientWallet.save();
     await freelancerWallet.save();
@@ -110,7 +117,7 @@ exports.chargeWallet = async (req, res) => {
             return res.status(404).json({ message: 'Wallet not found' });
         }
 
-        wallet.availableBalance += amount;
+        wallet.availableBalance += +amount;
 
         wallet.updatedAt = Date.now();
         await wallet.save();
