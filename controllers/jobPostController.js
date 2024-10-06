@@ -110,8 +110,22 @@ exports.getClientJobPosts = async (req, res) => {
     try {
         const clientId = req.user._id;
 
-        const jobPosts = await JobPost.find({ client: clientId });
-        res.status(200).json({ results: jobPosts.length, data: jobPosts });
+        const jobPosts = await JobPost.find({ client: clientId }).populate(
+            'client'
+        );
+        const jobPostsWithProposalCount = await Promise.all(
+            jobPosts.map(async (jobPost) => {
+                const proposalCount = await Proposal.countDocuments({
+                    jobPost: jobPost._id,
+                });
+                return { ...jobPost.toObject(), proposalCount };
+            })
+        );
+
+        res.status(200).json({
+            results: jobPostsWithProposalCount.length,
+            data: jobPostsWithProposalCount,
+        });
     } catch (error) {
         res.status(500).json({ message: 'Error fetching job posts', error });
     }
