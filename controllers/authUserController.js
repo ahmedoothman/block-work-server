@@ -5,14 +5,14 @@ const catchAsync = require('./../utils/catchAsync');
 const sendEmail = require('../utils/email');
 const AppError = require('./../utils/appError');
 const { ref, uploadBytes, getDownloadURL } = require('firebase/storage');
-const storage = require('../utils/firebaseConfig'); // Import your Firebase storage config
+const storage = require('../utils/firebaseConfig');
 const multer = require('multer');
 const path = require('path');
 const crypto = require('crypto');
 
 const upload = multer({
     storage: multer.memoryStorage(),
-    limits: { fileSize: 5 * 1024 * 1024 }, // 5 MB file size limit
+    limits: { fileSize: 5 * 1024 * 1024 },
 });
 const signToken = (id) => {
     return jwt.sign({ id }, process.env.JWT_SECRET, {
@@ -26,11 +26,10 @@ const createSendToken = (user, statusCode, res) => {
         expires: new Date(
             Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000
         ),
-        httpOnly: true, //cookie cannot be modified or accessed by the browser to prevent scripting attack
+        httpOnly: true,
     };
-    if (process.env.NODE_ENV === 'production') cookieOptions.secure = true; //when we use https
+    if (process.env.NODE_ENV === 'production') cookieOptions.secure = true;
     res.cookie('jwt', token, cookieOptions);
-    // Remove password from output
     user.password = undefined;
 
     res.status(statusCode).json({
@@ -45,22 +44,23 @@ const createSendToken = (user, statusCode, res) => {
 exports.login = catchAsync(async (req, res, next) => {
     const { email, password } = req.body;
 
-    // 1) Check if email and password exist
     if (!email || !password) {
         return next(new AppError('Please provide email and password!', 400));
     }
-    // 2) Check if user exists && password is correct
     const user = await User.findOne({ email }).select('+password');
     if (!user) {
         return next(new AppError('User Not Found', 400));
     }
     const correct = await user.correctPassword(password, user.password);
 
+    if (!user.verified) {
+        return next(new AppError('User not verified', 401));
+    }
+
     if (!user || !correct) {
         return next(new AppError('Incorrect email or password', 401));
     }
 
-    // 4) If everything ok, send token to client
     createSendToken(user, 200, res);
 });
 
@@ -85,7 +85,6 @@ exports.signup = [
                 );
             }
 
-            // Create references to the storage paths for uploaded files
             const frontPhotoRef = ref(
                 storage,
                 `users/${Date.now()}_frontIdPhoto${path.extname(
@@ -105,7 +104,6 @@ exports.signup = [
                 )}`
             );
 
-            // Upload the files to Firebase Storage
             const frontIdPhotoSnapshot = await uploadBytes(
                 frontPhotoRef,
                 req.files.frontIdPhoto[0].buffer
@@ -119,7 +117,6 @@ exports.signup = [
                 req.files.userPhoto[0].buffer
             );
 
-            // Retrieve the URLs for the uploaded files
             const frontIdPhotoUrl = await getDownloadURL(
                 frontIdPhotoSnapshot.ref
             );
@@ -128,7 +125,6 @@ exports.signup = [
             );
             const userPhotoUrl = await getDownloadURL(userPhotoSnapshot.ref);
 
-            // Create a new user record with the uploaded file URLs
             const newUser = await User.create({
                 walletAddress: req.body.walletAddress,
                 name: req.body.name,
@@ -139,9 +135,9 @@ exports.signup = [
                 nationalId: req.body.nationalId,
                 role: req.body.role,
                 country: req.body.country,
-                frontIdPhotoUrl, // Save the URL here
-                backIdPhotoUrl, // Save the URL here
-                userPhotoUrl, // Save the user photo URL here
+                frontIdPhotoUrl,
+                backIdPhotoUrl,
+                userPhotoUrl,
             });
 
             req.body.userId = newUser._id;
@@ -155,7 +151,6 @@ exports.signup = [
 ];
 
 exports.protect = catchAsync(async (req, res, next) => {
-    //1) get Token
     let token;
     if (
         req.headers.authorization &&
@@ -175,10 +170,8 @@ exports.protect = catchAsync(async (req, res, next) => {
         );
     }
 
-    //2) Verification token
     const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
 
-    //3) Check if user still exists
     const currentUser = await User.findById(decoded.id);
     if (!currentUser) {
         return next(
@@ -189,7 +182,6 @@ exports.protect = catchAsync(async (req, res, next) => {
         );
     }
 
-    // Grant Access
     req.user = currentUser;
     res.locals.user = currentUser;
     next();
@@ -210,13 +202,11 @@ exports.restrictTo = (...roles) => {
 };
 
 exports.updatePassword = catchAsync(async (req, res, next) => {
-    //1) get user
     const user = await User.findById(req.user.id).select('+password');
     if (!user) {
         return next(new AppError('There is no user with that id.', 404));
     }
 
-    //2 check  current password
     const correctPass = await user.correctPassword(
         req.body.passwordCurrent,
         user.password
@@ -224,26 +214,20 @@ exports.updatePassword = catchAsync(async (req, res, next) => {
     if (!correctPass) {
         return next(new AppError('Current password is not correct', 401));
     }
-    //3 update user
     user.password = req.body.password;
     user.passwordConfirm = req.body.passwordConfirm;
     await user.save();
 
-    //4 log user in
     createSendToken(user, 200, res);
 });
 
 exports.forgotPassword = catchAsync(async (req, res, next) => {
-    //1) get user by email
     const user = await User.findOne({ email: req.body.email });
     if (!user) {
         return next(new AppError('there is no user with that email', 404));
     }
-    //2) Generate random reset Code
     const resetCode = await user.createPasswordResetCode();
     await user.save({ validateBeforeSave: false });
-
-    //3)send it to user email
 
     try {
         new sendEmail(
@@ -270,7 +254,6 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
 });
 
 exports.resetPassword = catchAsync(async (req, res, next) => {
-    //1) hash code and get user
     const hashedCode = crypto
         .createHash('sha256')
         .update(req.params.code)
@@ -281,18 +264,15 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
         passwordResetExpires: { $gt: Date.now() },
     });
 
-    //2) check if user exists or code has expired
     if (!user) {
         return next(new AppError('code is expired or invalid', 400));
     }
 
-    //3) update password
     user.password = req.body.password;
     user.passwordConfirm = req.body.passwordConfirm;
     user.passwordResetCode = undefined;
     user.passwordResetExpires = undefined;
     await user.save();
 
-    //4)log user in
     createSendToken(user, 200, res);
 });
