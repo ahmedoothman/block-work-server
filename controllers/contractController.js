@@ -289,8 +289,13 @@ exports.updateContractStatus = catchAsync(async (req, res, next) => {
         jobPost: jobID,
         freelancer: freelancerID,
     });
+    const job = await jobPost.findById(jobID);
+    console.log(job);
     // If completed, pay the freelancer and close the contract and job post status to completed
     if (+statusValue === 1) {
+        // Update job post status
+        job.status = 'completed';
+        await job.save();
         const response = await walletController.updateWalletBalanceUtility({
             clientId: req.user._id,
             freelancerId: proposalData.freelancer,
