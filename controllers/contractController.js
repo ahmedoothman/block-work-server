@@ -268,6 +268,7 @@ exports.getClientContracts = catchAsync(async (req, res, next) => {
 
 exports.updateContractStatus = catchAsync(async (req, res, next) => {
     const jobID = req.params.jobID;
+    const freelancerID = req.params.freelancerID;
     const status = req.body.contractStatus; // pending, completed cancelled
     console.log(status);
     let statusValue;
@@ -285,7 +286,10 @@ exports.updateContractStatus = catchAsync(async (req, res, next) => {
     }
 
     // Get proposal by jobID
-    const proposalData = await proposal.findOne({ jobPost: jobID });
+    const proposalData = await proposal.findOne({
+        jobPost: jobID,
+        freelancer: freelancerID,
+    });
     // If completed, pay the freelancer and close the contract and job post status to completed
     if (+statusValue === 1) {
         const job = await jobPost.findByIdAndUpdate(jobID, {

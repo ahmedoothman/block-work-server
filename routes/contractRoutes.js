@@ -13,6 +13,9 @@ router.get(
     contractController.getFreelancerContracts
 );
 
-router.patch('/:jobID/status', contractController.updateContractStatus);
+router.patch(
+    '/:jobID/:freelancerID/status',
+    contractController.updateContractStatus
+);
 
 module.exports = router;
