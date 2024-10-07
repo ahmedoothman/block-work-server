@@ -205,8 +205,8 @@ exports.getFreelancerContracts = catchAsync(async (req, res, next) => {
             data: formattedContracts,
         });
     } else {
-        const freelancerId = req.user._id;
-        const contracts = await Contract.find({ freelancerId }).populate(
+        const freelancer = req.user._id;
+        const contracts = await Contract.find({ freelancer }).populate(
             'client freelancer job'
         );
 
@@ -255,8 +255,8 @@ exports.getClientContracts = catchAsync(async (req, res, next) => {
             data: formattedContracts,
         });
     } else {
-        const clientId = req.user._id;
-        const contracts = await Contract.find({ clientId }).populate(
+        const client = req.user._id;
+        const contracts = await Contract.find({ client }).populate(
             'client freelancer job'
         );
 

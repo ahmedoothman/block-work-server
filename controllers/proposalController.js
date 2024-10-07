@@ -155,13 +155,6 @@ exports.updateProposalStatus = async (req, res) => {
             });
         }
 
-        // update job post status to 'open' if proposal is rejected
-        if (status === 'rejected') {
-            await JobPost.findByIdAndUpdate(proposal.jobPost._id, {
-                status: 'open',
-            });
-        }
-
         res.status(200).json({
             message: 'Proposal status updated successfully',
             data: proposal,
