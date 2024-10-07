@@ -285,18 +285,15 @@ exports.updateContractStatus = catchAsync(async (req, res, next) => {
             statusValue = 2;
             break;
     }
-
+    console.log(jobID, freelancerID);
     // Get proposal by jobID
     const proposalData = await proposal.findOne({
         jobPost: jobID,
         freelancer: freelancerID,
     });
+    console.log(proposalData);
     // If completed, pay the freelancer and close the contract and job post status to completed
     if (+statusValue === 1) {
-        const job = await jobPost.findByIdAndUpdate(jobID, {
-            status: 'completed',
-        });
-
         const response = await walletController.updateWalletBalanceUtility({
             clientId: req.user._id,
             freelancerId: proposalData.freelancer,
@@ -308,11 +305,6 @@ exports.updateContractStatus = catchAsync(async (req, res, next) => {
                 message: 'Error paying the freelancer',
             });
         }
-    }
-    if (+statusValue === 2) {
-        await jobPost.findByIdAndUpdate(jobID, {
-            status: 'open',
-        });
     }
 
     if (MODE === 'BLOCKCHAIN') {
@@ -346,12 +338,13 @@ exports.updateContractStatus = catchAsync(async (req, res, next) => {
             },
         });
     } else {
-        const contract = await Contract.findOne({ jobID });
+        console.log('here');
+        const contract = await Contract.findOne({ job: jobID });
         console.log(contract);
         if (!contract) {
             return res.status(404).json({ message: 'Contract not found' });
         }
-
+        console.log(status);
         contract.status = status;
 
         await contract.save();
