@@ -115,7 +115,6 @@ exports.updateProposalStatus = async (req, res) => {
     try {
         const { proposalId } = req.params;
         const { status } = req.body;
-        console.log(status);
         // Validate status
         const validStatuses = ['pending', 'accepted', 'rejected'];
         if (!validStatuses.includes(status)) {

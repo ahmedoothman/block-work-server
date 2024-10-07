@@ -271,7 +271,6 @@ exports.updateContractStatus = catchAsync(async (req, res, next) => {
     const jobID = req.params.jobID;
     const freelancerID = req.params.freelancerID;
     const status = req.body.contractStatus; // pending, completed cancelled
-    console.log(status);
     let statusValue;
 
     switch (status) {
@@ -285,13 +284,11 @@ exports.updateContractStatus = catchAsync(async (req, res, next) => {
             statusValue = 2;
             break;
     }
-    console.log(jobID, freelancerID);
     // Get proposal by jobID
     const proposalData = await proposal.findOne({
         jobPost: jobID,
         freelancer: freelancerID,
     });
-    console.log(proposalData);
     // If completed, pay the freelancer and close the contract and job post status to completed
     if (+statusValue === 1) {
         const response = await walletController.updateWalletBalanceUtility({
@@ -338,13 +335,12 @@ exports.updateContractStatus = catchAsync(async (req, res, next) => {
             },
         });
     } else {
-        console.log('here');
         const contract = await Contract.findOne({ job: jobID });
-        console.log(contract);
+
         if (!contract) {
             return res.status(404).json({ message: 'Contract not found' });
         }
-        console.log(status);
+
         contract.status = status;
 
         await contract.save();

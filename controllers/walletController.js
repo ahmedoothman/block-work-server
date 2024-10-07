@@ -95,7 +95,7 @@ exports.updateWalletBalanceUtility = async (data) => {
     // fs.writeFileSync('stats/stats.json', JSON.stringify(stats));
 
     const amountToTransfer = +data.amount - commission;
-    console.log(amountToTransfer);
+
     // update the balances
     if (clientWallet.availableBalance < +data.amount) {
         return false;

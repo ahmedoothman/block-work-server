@@ -66,7 +66,6 @@ exports.login = catchAsync(async (req, res, next) => {
 
 exports.signup = catchAsync(async (req, res, next) => {
     try {
-        console.log(req.body);
         const newUser = await User.create({
             name: req.body.name,
             email: req.body.email,
