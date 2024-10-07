@@ -54,9 +54,9 @@ exports.createContract = catchAsync(async (req, res, next) => {
     } else {
         // Local mode logic
         const contract = await Contract.create({
-            clientId,
-            freelancerId,
-            jobID,
+            client: clientId,
+            freelancer: freelancerId,
+            job: jobID,
             amount,
             duration,
             status,
@@ -80,9 +80,9 @@ exports.createContract = catchAsync(async (req, res, next) => {
 exports.createContractUtility = async (data) => {
     if (MODE === 'LOCAL') {
         const contract = await Contract.create({
-            clientId: data.clientId,
-            freelancerId: data.freelancerId,
-            jobID: data.jobID,
+            client: data.clientId,
+            freelancer: data.freelancerId,
+            job: data.jobID,
             amount: data.amount,
             duration: data.duration,
             status: 'pending',
@@ -90,6 +90,7 @@ exports.createContractUtility = async (data) => {
 
         return {
             status: 'success',
+            data: contract,
         };
     } else {
         const provider = new ethers.JsonRpcProvider(providerUrl);
@@ -156,7 +157,7 @@ exports.getAllContracts = catchAsync(async (req, res, next) => {
     } else {
         // Local mode logic
         const contracts = await Contract.find().populate(
-            'clientId freelancerId jobID'
+            'client freelancer job'
         );
 
         res.status(200).json({
@@ -206,7 +207,7 @@ exports.getFreelancerContracts = catchAsync(async (req, res, next) => {
     } else {
         const freelancerId = req.user._id;
         const contracts = await Contract.find({ freelancerId }).populate(
-            'clientId freelancerId jobID'
+            'client freelancer job'
         );
 
         res.status(200).json({
@@ -256,7 +257,7 @@ exports.getClientContracts = catchAsync(async (req, res, next) => {
     } else {
         const clientId = req.user._id;
         const contracts = await Contract.find({ clientId }).populate(
-            'clientId freelancerId jobID'
+            'client freelancer job'
         );
 
         res.status(200).json({

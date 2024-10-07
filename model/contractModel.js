@@ -2,17 +2,17 @@
 const mongoose = require('mongoose');
 
 const contractSchema = new mongoose.Schema({
-    clientId: {
+    client: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
         required: true,
     },
-    freelancerId: {
+    freelancer: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
         required: true,
     },
-    jobID: {
+    job: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'JobPost',
         required: true,
