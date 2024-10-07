@@ -5,8 +5,8 @@ const { ethers } = require('ethers');
 const reviewContractABI = require('../ABI/reviewContractABI.json');
 const { format } = require('morgan');
 const providerUrl = process.env.ETHEREUM_PROVIDER_URL;
-const MODE = 'LOCAL'; // 'BLOCKCHAIN' or 'LOCAL'
 
+const MODE = process.env.NETWORK_MODE;
 exports.createReview = catchAsync(async (req, res, next) => {
     const reviewer = req.user._id;
     const { reviewee, comment, rating } = req.body;

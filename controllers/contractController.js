@@ -8,7 +8,7 @@ const freelancerContractABI = require('../ABI/freelancerContractABI.json');
 const providerUrl = process.env.ETHEREUM_PROVIDER_URL;
 const Contract = require('../model/contractModel'); // Local model
 
-const MODE = 'LOCAL'; // 'BLOCKCHAIN' or 'LOCAL'
+const MODE = process.env.NETWORK_MODE;
 
 exports.createContract = catchAsync(async (req, res, next) => {
     const clientId = req.user._id;
