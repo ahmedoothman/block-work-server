@@ -80,19 +80,18 @@ exports.updateWalletBalance = async (req, res) => {
 };
 
 exports.updateWalletBalanceUtility = async (data) => {
-    // data has : clientId,freelancerId, amount // get the wallet of the client and freelancer
-    // make the transaction from the client to the freelancer wallet
+    const systemWalletId = process.env.SYSTEM_WALLET_ID;
     const clientWallet = await Wallet.findOne({ user: data.clientId });
     const freelancerWallet = await Wallet.findOne({ user: data.freelancerId });
+    const systemWallet = await Wallet.findOne({ user: systemWalletId });
     if (!clientWallet || !freelancerWallet) {
         return false;
     }
-    // suntract 10% from the amount as commission
+
     const commission = (10 / 100) * +data.amount;
-    // save commission to the stats/stats.json file
-    // const stats = JSON.parse(fs.readFileSync('stats/stats.json'));
-    // stats.totalProfit += commission;
-    // fs.writeFileSync('stats/stats.json', JSON.stringify(stats));
+
+    // transfer the commission to the system wallet
+    systemWallet.availableBalance += commission;
 
     const amountToTransfer = +data.amount - commission;
 
@@ -107,7 +106,7 @@ exports.updateWalletBalanceUtility = async (data) => {
 
     await clientWallet.save();
     await freelancerWallet.save();
-
+    await systemWallet.save();
     return true;
 };
 
