@@ -1,4 +1,4 @@
-import catchAsync from '../utils/catchAsync.js';
+const catchAsync = require('../utils/catchAsync');
 
 /* 
 {
