@@ -78,10 +78,10 @@ exports.createContract = catchAsync(async (req, res, next) => {
     }
 });
 exports.createContractUtility = async (data) => {
-    const contract = await Contract.create({
+    const contractData = await Contract.create({
         client: data.clientId,
-        freelancer: data.freelancerId,
-        job: data.jobID,
+        freelancer: data.freelancerId._id,
+        job: data.jobID._id,
         amount: data.amount,
         duration: data.duration,
         status: 'pending',
@@ -90,7 +90,7 @@ exports.createContractUtility = async (data) => {
     if (MODE === 'LOCAL') {
         return {
             status: 'success',
-            data: contract,
+            data: contractData,
         };
     } else {
         const provider = new ethers.JsonRpcProvider(providerUrl);
@@ -105,12 +105,11 @@ exports.createContractUtility = async (data) => {
             freelancerContractABI,
             wallet
         );
-
         const tx = await contract.createContract(
-            contract._id.toString(),
+            contractData._id.toString(),
             data.clientId.toString(),
-            data.freelancerId.toString(),
-            data.jobID.toString(),
+            data.freelancerId._id.toString(),
+            data.jobID._id.toString(),
             +data.amount,
             +data.duration
         );
@@ -134,9 +133,10 @@ exports.getAllContracts = catchAsync(async (req, res, next) => {
         );
 
         const contracts = await contract.getAllContracts();
+        console.log(contracts);
         const formattedContracts = await Promise.all(
             contracts.map(async (contract) => {
-                const contract = await Contract.findById(contract[0]);
+                const contractData = await Contract.findById(contract[0]);
                 const client = await User.findById(contract[1]);
                 const freelancer = await User.findById(contract[2]);
                 const job = await jobPost.findById(contract[3]);
@@ -144,10 +144,16 @@ exports.getAllContracts = catchAsync(async (req, res, next) => {
                     amount: contract[4].toString(),
                     createdDate: new Date(+contract[5].toString() * 1000),
                     duration: contract[6].toString(),
-                    status: contract[7].toString(),
+                    status:
+                        +contract[7].toString() === 0
+                            ? 'pending'
+                            : +contract[7].toString() === 1
+                            ? 'completed'
+                            : 'cancelled',
                     client,
                     freelancer,
                     job,
+                    contract: contractData,
                 };
             })
         );
@@ -186,18 +192,24 @@ exports.getFreelancerContracts = catchAsync(async (req, res, next) => {
 
         const formattedContracts = await Promise.all(
             contracts.map(async (contract) => {
-                const client = await User.findById(contract[0]);
-                const freelancer = await User.findById(contract[1]);
-                const job = await jobPost.findById(contract[2]);
-
+                const contractData = await Contract.findById(contract[0]);
+                const client = await User.findById(contract[1]);
+                const freelancer = await User.findById(contract[2]);
+                const job = await jobPost.findById(contract[3]);
                 return {
-                    amount: contract[3].toString(),
-                    createdDate: new Date(+contract[4].toString() * 1000),
-                    duration: contract[5].toString(),
-                    status: contract[6].toString(),
+                    amount: contract[4].toString(),
+                    createdDate: new Date(+contract[5].toString() * 1000),
+                    duration: contract[6].toString(),
+                    status:
+                        +contract[7].toString() === 0
+                            ? 'pending'
+                            : +contract[7].toString() === 1
+                            ? 'completed'
+                            : 'cancelled',
                     client,
                     freelancer,
                     job,
+                    contract: contractData,
                 };
             })
         );
@@ -236,18 +248,24 @@ exports.getClientContracts = catchAsync(async (req, res, next) => {
 
         const formattedContracts = await Promise.all(
             contracts.map(async (contract) => {
-                const client = await User.findById(contract[0]);
-                const freelancer = await User.findById(contract[1]);
-                const job = await jobPost.findById(contract[2]);
-
+                const contractData = await Contract.findById(contract[0]);
+                const client = await User.findById(contract[1]);
+                const freelancer = await User.findById(contract[2]);
+                const job = await jobPost.findById(contract[3]);
                 return {
-                    amount: contract[3].toString(),
-                    createdDate: new Date(+contract[4].toString() * 1000),
-                    duration: contract[5].toString(),
-                    status: contract[6].toString(),
+                    amount: contract[4].toString(),
+                    createdDate: new Date(+contract[5].toString() * 1000),
+                    duration: contract[6].toString(),
+                    status:
+                        +contract[7].toString() === 0
+                            ? 'pending'
+                            : +contract[7].toString() === 1
+                            ? 'completed'
+                            : 'cancelled',
                     client,
                     freelancer,
                     job,
+                    contract: contractData,
                 };
             })
         );
