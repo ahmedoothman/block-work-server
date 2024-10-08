@@ -154,6 +154,7 @@ exports.getAllContracts = catchAsync(async (req, res, next) => {
                     freelancer,
                     job,
                     contract: contractData,
+                    _id: contract[0],
                 };
             })
         );
@@ -210,6 +211,7 @@ exports.getFreelancerContracts = catchAsync(async (req, res, next) => {
                     freelancer,
                     job,
                     contract: contractData,
+                    _id: contract[0],
                 };
             })
         );
@@ -266,6 +268,7 @@ exports.getClientContracts = catchAsync(async (req, res, next) => {
                     freelancer,
                     job,
                     contract: contractData,
+                    _id: contract[0],
                 };
             })
         );
@@ -342,10 +345,10 @@ exports.updateContractStatus = catchAsync(async (req, res, next) => {
             freelancerContractABI,
             wallet
         );
-
+        console.log(contractId.toString(), statusValue.toString());
         const tx = await contract.updateContractStatusByContractID(
             contractId.toString(),
-            status.toString()
+            statusValue.toString()
         );
 
         await tx.wait();
