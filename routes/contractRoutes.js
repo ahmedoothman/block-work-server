@@ -14,7 +14,7 @@ router.get(
 );
 
 router.patch(
-    '/:jobID/:freelancerID/status',
+    '/:contractId/:freelancerID/status',
     contractController.updateContractStatus
 );
 

@@ -11,6 +11,11 @@
         "outputs": [
             {
                 "internalType": "string",
+                "name": "contractID",
+                "type": "string"
+            },
+            {
+                "internalType": "string",
                 "name": "clientID",
                 "type": "string"
             },
@@ -52,6 +57,11 @@
         "inputs": [
             {
                 "internalType": "string",
+                "name": "_contractID",
+                "type": "string"
+            },
+            {
+                "internalType": "string",
                 "name": "_clientID",
                 "type": "string"
             },
@@ -87,6 +97,11 @@
         "outputs": [
             {
                 "components": [
+                    {
+                        "internalType": "string",
+                        "name": "contractID",
+                        "type": "string"
+                    },
                     {
                         "internalType": "string",
                         "name": "clientID",
@@ -135,35 +150,58 @@
         "inputs": [
             {
                 "internalType": "string",
-                "name": "_jobID",
+                "name": "_contractID",
                 "type": "string"
             }
         ],
-        "name": "getContractIndexByJobID",
+        "name": "getContractByContractID",
         "outputs": [
             {
-                "internalType": "uint256",
+                "components": [
+                    {
+                        "internalType": "string",
+                        "name": "contractID",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "clientID",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "freelancerID",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "jobID",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "amount",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "createdDate",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "duration",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "enum FreelanceContract.Status",
+                        "name": "status",
+                        "type": "uint8"
+                    }
+                ],
+                "internalType": "struct FreelanceContract.Contract",
                 "name": "",
-                "type": "uint256"
-            }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "uint256",
-                "name": "_contractIndex",
-                "type": "uint256"
-            }
-        ],
-        "name": "getContractStatus",
-        "outputs": [
-            {
-                "internalType": "string",
-                "name": "",
-                "type": "string"
+                "type": "tuple"
             }
         ],
         "stateMutability": "view",
@@ -181,6 +219,11 @@
         "outputs": [
             {
                 "components": [
+                    {
+                        "internalType": "string",
+                        "name": "contractID",
+                        "type": "string"
+                    },
                     {
                         "internalType": "string",
                         "name": "clientID",
@@ -239,6 +282,11 @@
                 "components": [
                     {
                         "internalType": "string",
+                        "name": "contractID",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "string",
                         "name": "clientID",
                         "type": "string"
                     },
@@ -284,9 +332,9 @@
     {
         "inputs": [
             {
-                "internalType": "uint256",
-                "name": "_contractIndex",
-                "type": "uint256"
+                "internalType": "string",
+                "name": "_contractID",
+                "type": "string"
             },
             {
                 "internalType": "enum FreelanceContract.Status",
@@ -294,7 +342,7 @@
                 "type": "uint8"
             }
         ],
-        "name": "updateContractStatus",
+        "name": "updateContractStatusByContractID",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"
