@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const authController = require('../controllers/authUserController');
-const reviewController = require('../controllers/reviewContract');
+const reviewController = require('../controllers/reviewController');
 
 router.use(authController.protect);
 

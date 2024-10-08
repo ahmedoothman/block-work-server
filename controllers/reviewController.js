@@ -92,7 +92,9 @@ exports.getAllReviews = catchAsync(async (req, res, next) => {
             data: formatedReviews,
         });
     } else {
-        const reviews = await Review.find({ reviewee: reviewee });
+        const reviews = await Review.find({ reviewee: reviewee }).populate(
+            'reviewer reviewee'
+        );
         res.status(200).json({
             status: 'success',
             data: reviews,
