@@ -88,18 +88,18 @@ exports.updateWalletBalanceUtility = async (data) => {
         return false;
     }
 
-    const commission = (10 / 100) * +data.amount;
+    const commissionFreelancer = (5 / 100) * +data.amount;
+    const commissionClient = (5 / 100) * +data.amount;
+    // transfer the commissionFreelancer to the system wallet
+    systemWallet.availableBalance += commissionFreelancer + commissionClient;
 
-    // transfer the commission to the system wallet
-    systemWallet.availableBalance += commission;
-
-    const amountToTransfer = +data.amount - commission;
+    const amountToTransfer = +data.amount - commissionFreelancer;
 
     // update the balances
     if (clientWallet.availableBalance < +data.amount) {
         return false;
     }
-    clientWallet.availableBalance -= +data.amount;
+    clientWallet.availableBalance -= +data.amount + commissionClient;
 
     // update the pending avail of the freelancer
     freelancerWallet.pendingBalance += +amountToTransfer;
