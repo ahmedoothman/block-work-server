@@ -349,8 +349,8 @@ exports.updateContractStatus = catchAsync(async (req, res, next) => {
     }
 
     if (+statusValue === 2) {
-        // return job post status to in-progress
-        job.status = 'in-progress';
+        // return job post status to open
+        job.status = 'open';
         await job.save();
     }
 
