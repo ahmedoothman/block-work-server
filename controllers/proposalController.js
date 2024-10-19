@@ -116,7 +116,7 @@ exports.updateProposalStatus = async (req, res) => {
         const { proposalId } = req.params;
         const { status } = req.body;
         // Validate status
-        const validStatuses = ['pending', 'accepted', 'rejected'];
+        const validStatuses = ['submitted', 'accepted', 'rejected'];
         if (!validStatuses.includes(status)) {
             return res.status(400).json({ message: 'Invalid status value' });
         }
@@ -144,6 +144,11 @@ exports.updateProposalStatus = async (req, res) => {
             });
 
             if (response.status !== 'success') {
+                // return proposal status to pending
+                proposal.status = 'submitted';
+                await proposal.save({
+                    validateBeforeSave: false,
+                });
                 return res.status(500).json({
                     message: response.message,
                 });

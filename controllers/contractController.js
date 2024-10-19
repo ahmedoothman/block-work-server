@@ -148,7 +148,7 @@ exports.getAllContracts = catchAsync(async (req, res, next) => {
         );
 
         const contracts = await contract.getAllContracts();
-        console.log(contracts);
+
         const formattedContracts = await Promise.all(
             contracts.map(async (contract) => {
                 const contractData = await Contract.findById(contract[0]);
@@ -353,7 +353,16 @@ exports.updateContractStatus = catchAsync(async (req, res, next) => {
         job.status = 'open';
         await job.save();
     }
+    // Update contract status
+    const contract = await Contract.findById(contractId);
 
+    if (!contract) {
+        return res.status(404).json({ message: 'Contract not found' });
+    }
+
+    contract.status = status;
+
+    await contract.save();
     if (MODE === 'BLOCKCHAIN') {
         // Blockchain mode logic
         const provider = new ethers.JsonRpcProvider(providerUrl);
@@ -366,7 +375,7 @@ exports.updateContractStatus = catchAsync(async (req, res, next) => {
             freelancerContractABI,
             wallet
         );
-        console.log(contractId.toString(), statusValue.toString());
+
         const tx = await contract.updateContractStatusByContractID(
             contractId.toString(),
             statusValue.toString()
@@ -381,15 +390,6 @@ exports.updateContractStatus = catchAsync(async (req, res, next) => {
             },
         });
     } else {
-        const contract = await Contract.findById(contractId);
-
-        if (!contract) {
-            return res.status(404).json({ message: 'Contract not found' });
-        }
-
-        contract.status = status;
-
-        await contract.save();
         res.status(200).json({
             status: 'success',
             data: {
