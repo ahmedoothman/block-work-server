@@ -78,6 +78,18 @@ exports.createContract = catchAsync(async (req, res, next) => {
     }
 });
 exports.createContractUtility = async (data) => {
+    // check if is already a contract for this job and its status is pending or completed then return
+    const existingContract = await Contract.findOne({
+        job: data.jobID._id,
+        status: { $in: ['pending', 'completed'] },
+    });
+
+    if (existingContract) {
+        return {
+            status: 'error',
+            message: 'Contract already exists for this job',
+        };
+    }
     const contractData = await Contract.create({
         client: data.clientId,
         freelancer: data.freelancerId._id,
@@ -91,6 +103,7 @@ exports.createContractUtility = async (data) => {
         return {
             status: 'success',
             data: contractData,
+            message: 'Contract created successfully',
         };
     } else {
         const provider = new ethers.JsonRpcProvider(providerUrl);
@@ -117,6 +130,8 @@ exports.createContractUtility = async (data) => {
         const receipt = await tx.wait();
         return {
             status: 'success',
+            data: contractData,
+            message: 'Contract created successfully',
         };
     }
 };
@@ -331,6 +346,12 @@ exports.updateContractStatus = catchAsync(async (req, res, next) => {
                 message: 'Error paying the freelancer',
             });
         }
+    }
+
+    if (+statusValue === 2) {
+        // return job post status to in-progress
+        job.status = 'in-progress';
+        await job.save();
     }
 
     if (MODE === 'BLOCKCHAIN') {

@@ -145,7 +145,7 @@ exports.updateProposalStatus = async (req, res) => {
 
             if (response.status !== 'success') {
                 return res.status(500).json({
-                    message: 'Error creating contract',
+                    message: response.message,
                 });
             }
 
