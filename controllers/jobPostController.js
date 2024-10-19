@@ -37,8 +37,7 @@ exports.getJobPosts = async (req, res) => {
     try {
         // Find job posts with status 'open'
         const jobPosts = await JobPost.find({ status: 'open' }).populate(
-            'client',
-            'name email country'
+            'client'
         );
 
         const jobPostsWithProposalCount = await Promise.all(
@@ -63,7 +62,7 @@ exports.getJobPost = async (req, res) => {
     try {
         const { jobId } = req.params;
         const jobPost = await JobPost.findById(jobId)
-            .populate('client', 'name email')
+            .populate('client')
             .populate('proposals');
 
         if (!jobPost) {
